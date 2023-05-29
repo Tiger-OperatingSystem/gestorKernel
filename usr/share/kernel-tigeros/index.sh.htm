@@ -1,0 +1,344 @@
+#!/bin/bash
+
+icon_theme="$(xfconf-query -c xsettings -p /Net/IconThemeName)"
+sys_theme="$(xfconf-query -c xsettings -p /Net/ThemeName)"
+
+if [ $(grep -i 'obsidian' <<< $sys_theme) ];then
+    css_check="dark"
+    color="black"
+elif [ $(grep -i 'jade' <<< $sys_theme) ];then
+    css_check="light"
+    color="#888"
+else
+    css_check="light"
+    color="#888"
+fi
+
+echo '
+<head>
+  <title>Configurações de Kernel</title>
+  <link rel="stylesheet" type="text/css" href="css/bootstrap-'$css_check'.min.css">
+  <link rel="stylesheet" type="text/css" href="css/table.css">
+</head>
+<body oncontextmenu="return false;">
+
+<div class="container-fluid">
+    <div class="row shadow-sm">
+      <div class="col-3">
+        <div style="line-height:10px">&nbsp;</div>
+        <img class="img-fluid rounded mx-auto d-block" title="Kernel"
+             src="icons/logo.png" alt="logo" width="90" height="90"><br>
+      </div>
+      <div class="col-6">
+        <div style="line-height:10px">&nbsp;</div>
+        <p><h1 style="text-shadow:2px 2px 2px '$color'" class="text-center">
+            Configurar Kernel
+        </h1></p>
+      </div>
+      <div class="col-3">
+        <div style="line-height:10px">&nbsp;</div>
+        <img class="img-fluid rounded mx-auto d-block" title="TigerOS"
+             src="icons/logo2.png" alt="logo2" width="80" height="80"><br>
+      </div>
+    </div>
+    <div style="line-height:8px">&nbsp;</div>'
+    if [ ! -d /rofs ];then
+    echo '  <ul class="nav nav-tabs">
+
+              <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#lowlatency">
+                    <b style="font-size: 14pt">Kernel Low-Latency</b>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#xanmod">
+                    <b style="font-size: 14pt">Kernel XanMod</b>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#liquorix">
+                    <b style="font-size: 14pt">Kernel Liquorix</b>
+                </a>
+              </li>'
+              kernels="$(dpkg --get-selections linux-image-[0-9]*|awk '{print $1}')"
+              number_of_kernel=$(wc -l <<< $kernels)
+              if [ $number_of_kernel -gt 1 ];then
+              echo '<li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#oldkernel">
+                            <b style="font-size: 14pt">Remover Kernel</b>
+                        </a>
+                    </li>'
+              fi
+            echo '
+            </ul>
+
+            <div id="myTabContent" class="tab-content">
+
+              <div class="tab-pane fade active show" id="lowlatency">
+                <div style="line-height:8px">&nbsp;</div>
+
+                <div class="scrollbar" id="table-wrapper-lowlatency">
+                    <table class="table table-hover table-responsive" id="tablelowlatency">
+                        <thead class="thead-light text-center">
+                            <tr>
+                              <th scope="col">Versão</th>
+                              <th scope="col">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablelow"></tbody>
+                    </table>
+                </div>
+
+                <div id="content_low">
+                    <p>O Kernel de baixa latência, ou low latency, é indicado principalmente para quem trabalha com edição de vídeos ou ainda, servidores, pois são programas que exigem que o tempo de resposta do processador seja ainda menor.<br>Então a troca do Kernel padrão e genérico, por um preemptível de baixa latência — low latency — que, como seu próprio nome diz, ele possui uma latência ainda menor devido ao mesmo permitir preempção, pode ser bastante vantajoso.</p>
+                    <p>Enquanto o kernel generic tem um escalonador de tarefas (scheduller) convencional, ele distribui os processos e tenta fazer o balanço dos recursos. Já no low latency você consegue ter um scheduller “otimizado”, ele tenta a todo tempo jogar os processos em prioridades mais altas possíveis até consumir boa parte ou toda sua memória e processamento. Portanto, o Low Latency pode também consumir mais recursos do hardware e do sistema.</p>
+
+                    <div class="row">
+                        <div class="col-1"></div>
+                        <button type="button" class="btn btn-primary col-4" id="btnlow">Exibir Versões</button>
+                        <div class="col-2"></div>
+                        <button type="button" class="btn btn-info col-4"
+                                data-toggle="modal" data-target="#lowModal">Saiba Mais</button>
+                        <div class="col-1"></div>
+                    </div>
+
+                    <div class="modal" id="lowModal">
+                      <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Kernel LowLatency - Principais Características</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            <p>Caso você não necessite editar vídeos ou mesmo música de maneira profissional, esse kernel não deverá ser muito interessante.</p>
+                            <p>Caso tenha ficado com dúvidas, recomendamos o vídeo do link a baixo.</p>
+                            <button type="button" class="btn btn-outline-info btn-block"
+                            '"onclick=\"_run('./install.sh youtube-lowlatency')\""'>Low Latency - YouTube</button>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+              </div>
+
+              <div class="tab-pane fade" id="xanmod">
+                <div style="line-height:8px">&nbsp;</div>
+
+                <div class="scrollbar" id="table-wrapper-xanmod">
+                    <table class="table table-hover table-responsive" id="tablexanmod">
+                        <thead class="thead-light text-center">
+                            <tr>
+                              <th scope="col">Versão</th>
+                              <th scope="col">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablexan"></tbody>
+                    </table>
+                </div>
+
+                <div id="content_xanmod">
+                    <p>XanMod é uma distribuição de kernel Linux de propósito geral com configurações personalizadas e novos recursos. Construído para fornecer uma experiência de desktop estável, ágil e suave.</p>
+                    <p>A versão em tempo real é recomendada para aplicativos críticos de tempo de execução, como eSports de jogos Linux, streaming, produções ao vivo e entusiastas de latência ultrabaixa.</p>
+                    <p>Suporta todas as versões recentes de 64 bits de sistemas baseados em Debian e Ubuntu.</p>
+
+                    <div class="row">
+                        <div class="col-1"></div>
+                        <button type="button" class="btn btn-primary col-4" id="btnxan">Exibir Versões</button>
+                        <div class="col-2"></div>
+                        <button type="button" class="btn btn-info col-4"
+                                data-toggle="modal" data-target="#xanmodModal">Saiba Mais</button>
+                        <div class="col-1"></div>
+                    </div>
+
+                    <div class="modal" id="xanmodModal">
+                      <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Kernel XanMod - Principais Características</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            <ul>
+                                <li>Kernel preemptivo Full Tickless a 500Hz c / Tuned CPU Core Scheduler.</li>
+                                <li>RCU Boost para melhor capacidade de resposta e menor latência geral do sistema.</li>
+                                <li>Solicitações de fila de execução de camada de bloco de vários núcleos completas para alta taxa de transferência de E / S.</li>
+                                <li>Melhorias no cache, Virtual Memory Manager e CPUFreq Governor.</li>
+                                <li>BBR TCP Congestion Control + FQ-PIE Packet Scheduling e AQM Algorithm [5.9] [5.9-rt].</li>
+                                <li>ORC Unwinder para implementação de Kernel Stack Traces (debuginfo).</li>
+                                <li>Patchset de terceiros disponível: kernel ZSTD, initrd e suporte a módulos [5.9] [5.9-rt], instruções x86_64 FSGSBASE [5.9] [5.9-rt], Clear Linux [parcial], CK's Hrtimer Patchset, Wine / Proton Fsync, PCIe ACS Override, Aufs [5.4] e GCC graysky's.</li>
+                                <li>Versão do kernel Linux em tempo real (PREEMPT_RT) disponível [5.9-rt] [5.4-rt].</li>
+                                <li>Pacote de kernel genérico para compatibilidade com a maioria das distribuições baseadas em Debian e Ubuntu. Compilado no último GCC 10.2 e Binutils 2.35.</li>
+                                <li>Licença GPLv2. Pode ser compilado para qualquer distribuição ou finalidade.</li>
+                            <ul>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+              </div>
+
+              <div class="tab-pane fade" id="liquorix">
+                <div style="line-height:8px">&nbsp;</div>
+
+                <div class="scrollbar" id="table-wrapper-liquorix">
+                    <table class="table table-hover table-responsive" id="tableliquorix">
+                        <thead class="thead-light text-center">
+                            <tr>
+                              <th scope="col">Versão</th>
+                              <th scope="col">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableliq"></tbody>
+                    </table>
+                </div>
+
+                <div id="content_liquorix">
+
+                    <p>Liquorix é uma substituição do kernel da distro compilada usando a melhor configuração e fontes de kernel para cargas de trabalho de desktop, multimídia e jogos.</p>
+                    <div class="row">
+                            <div class="col-1"></div>
+                            <button type="button" class="btn btn-primary col-4" id="btnliq">Exibir Versões</button>
+                            <div class="col-2"></div>
+                            <button type="button" class="btn btn-info col-4"
+                                    data-toggle="modal" data-target="#liquorixModal">Saiba Mais</button>
+                            <div class="col-1"></div>
+                    </div>
+
+                    <div class="modal" id="liquorixModal">
+                      <div class="modal-dialog  modal-dialog-scrollable modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Kernel Liquorix - Principais Características</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            <ul>
+                                <li>MuQSS Process Scheduler: Agendador de processo justo para jogos, multimídia e cargas em tempo real.</li>
+                                <li>Agendamento de alta resolução: tempos limites de alta resolução e taxa de tick de 1000 Hz para agendamento de tarefas de baixo jitter preciso.</li>
+                                <li>RCU hierárquica baseada em árvore preemptiva: implementação de RCU para sistemas em tempo real.</li>
+                                <li>Preempção de kernel rígido: Preempção de kernel mais agressiva antes de exigir patches em tempo real. Garante um sistema responsivo em cenários de carga de trabalho mista de alta intensidade.</li>
+                                <li>Budget Fair Queue: Programador de disco adequado otimizado para uso em desktop, alto rendimento / baixa latência.</li>
+                                <li>Controle de congestionamento TCP BBR: Controle rápido de congestionamento, maximiza o throughput, garantindo velocidades mais altas que o Cubic.</li>
+                                <li>Compilações binárias para distribuições populares do Debian: Compilações binárias são produzidas para o Debian Stable, Testing e Unstable. As compilações do Ubuntu estão disponíveis no Liquorix PPA no mesmo dia horas após o lançamento do Debian.</li>
+                                <li>Substituição Drop-in do Kernel de Distribuição: Configuração do estilo de distribuição adequado com suporte para a mais ampla seleção de hardware. Opções de paravirtualização habilitadas para reduzir a sobrecarga na virtualização.</li>
+                                <li>Depuração mínima: número mínimo de opções de depuração habilitadas para aumentar o rendimento do kernel.</li>
+                            </ul>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+              </div>
+
+              <div class="tab-pane fade" id="oldkernel">
+                <div style="line-height:8px">&nbsp;</div>
+
+                <p>Essa sessão é uma parte importante, mas também delicada do sistema operacional. De tempos em tempos, surgem correções de segurança para o Kernel que vem com o TigerOS, e são instaladas toda vez que você atualizar o sistema.<br>Porém, a versão antiga não é removida automaticamente, sendo necessário fazê-lo manualmente por aqui, o que resultará na liberação de um bom espaço no seu HD.</p>
+                <p>O mesmo precisa ser feito ao instalar um kernel Low Latency, XanMod ou Liquorix.<br>Importante: se houverem muitos kerneis listados para remoção, faça de 1 por 1, sempre reiniciando a máquina a cada remoção.</p>
+
+                <div class="row">
+                    <h5 class="col">Kernel ativo: <b>'"$(uname -r)"'</b></h5>
+                </div>
+                <div class="row">
+                    <table class="table table-hover table-responsive">
+                        <thead class="thead-light text-center">
+                            <tr>
+                                <th>Versão</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>'
+                            for k in $kernels;do
+                                if [ ! $(grep "$(uname -r)" <<< $k) ];then
+                                    echo '<tr>
+                                            <td class="align-middle"><h6>'$k'</h6></td>
+                                            <td>
+                                                <button class="btn btn-danger btn-block"
+                  '"onclick=\"_run('pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY $PWD/kernel-remove.sh $k')\""'>
+                                                    Remover
+                                                </button>
+                                            </td>
+                                        </tr>'
+                                fi
+                            done
+                  echo '</tbody>
+                    </table>
+                </div>
+              </div>
+            </div>'
+         else
+             echo '<br><h2 class="text-center">O sistema está em Modo Live!</h2>'
+        fi
+  echo '
+    </div>
+</div>
+<script type="text/javascript" src="js/jquery-3.5.1.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.bundle.min.js"></script>'
+
+echo "
+    <script type='text/javascript'>
+        \$(document).ready(function(){
+
+          \$('#table-wrapper-lowlatency, #table-wrapper-xanmod, #table-wrapper-liquorix').hide();
+
+          \$('#btnlow').click(function(e){
+              e.preventDefault();
+
+              \$('#btnlow').attr('class','btn btn-secondary col-4 disabled');
+              \$('#btnlow').html('Por favor, aguarde...');
+
+              \$.get('./install.sh', 'lowlatency', function(data){
+                  \$('#content_low').hide();
+                  \$('#tablelowlatency').show();
+                  \$('#tablelow').html(data);
+                  \$('#table-wrapper-lowlatency').show();
+              });
+          });
+
+          \$('#btnxan').click(function(e){
+              e.preventDefault();
+
+              \$('#btnxan').attr('class','btn btn-secondary col-4 disabled');
+              \$('#btnxan').html('Por favor, aguarde...');
+
+              \$.get('./install.sh', 'xanmod', function(data){
+                  \$('#content_xanmod').hide();
+                  \$('#tablexanmod').show();
+                  \$('#tablexan').html(data);
+                  \$('#table-wrapper-xanmod').show();
+              });
+          });
+
+          \$('#btnliq').click(function(e){
+              e.preventDefault();
+
+              \$('#btnliq').attr('class','btn btn-secondary col-4 disabled');
+              \$('#btnliq').html('Por favor, aguarde...');
+
+              \$.get('./install.sh', 'liquorix', function(data){
+                  \$('#content_liquorix').hide();
+                  \$('#tableliquorix').show();
+                  \$('#tableliq').html(data);
+                  \$('#table-wrapper-liquorix').show();
+              });
+          });
+        })
+    </script>
+</body>"

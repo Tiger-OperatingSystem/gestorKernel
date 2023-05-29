@@ -1,0 +1,9 @@
+[Desktop Entry]
+Exec=kernel-tigeros
+Icon=kernel-tigeros
+Name=Configurações de Kernel
+Comment=Configurações de Kernel para o TigerOS
+Categories=XFCE;GTK;Settings;DesktopSettings;X-XFCE-SettingsDialog;X-XFCE-SystemSettings;
+StartupNotify=true
+Terminal=false
+Type=Application

@@ -1,0 +1,12 @@
+.scrollbar {
+position: relative;
+height: 400px;
+overflow: auto;
+}
+
+#table-wrapper-lowlatency,
+#table-wrapper-xanmod,
+#table-wrapper-liquorix,
+#table-wrapper {
+display: block;
+}

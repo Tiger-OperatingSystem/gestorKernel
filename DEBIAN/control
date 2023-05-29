@@ -1,0 +1,11 @@
+Package: kernel-tigeros
+Version: 1.0.3
+Depends: yad, sed, grep, apt-transport-https, curl, gnupg, coreutils, xfconf
+Architecture: all
+Maintainer: eltonff <eltonfabricio10@gmail.com> charles <charlesstna@proton.me>
+Section: admin
+Priority: optional
+Installed-Size:980
+Description: Kernel configuration for TigerOS
+Conflicts: kernel-tigeros
+Replaces: kernel-tigeros
